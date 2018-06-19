@@ -25,7 +25,7 @@ import torch.optim as optim
 #Loading data
 
 def predict(addr, x, batch=False):
-	url = "http://%s/pytorch-example/predict" % addr
+	url = "http://%s/pytorch-example-2/predict" % addr
 	if batch:
 		req_json = json.dumps({'input_batch': [x]})
 	else:
@@ -36,12 +36,13 @@ def predict(addr, x, batch=False):
 		req_json = json.dumps({'input': x})
 	headers = {'Content-type': 'application/json'}
 	start = datetime.now()
-	print('sending request')
+	# print('sending request')
 	r = requests.post(url, headers=headers, data=req_json)
-	print('after request')
+	# print('after request')
 	end = datetime.now()
 	latency = (end - start).total_seconds() * 1000.0
-	print("'%s', %f ms" % (r.text, latency))
+	print(r.json())
+	print("%f ms" % (latency))
 
 def signal_handler(signal, frame):
 	print("Stopping Clipper...")
@@ -53,7 +54,7 @@ def signal_handler(signal, frame):
 
 transform = transforms.Compose([transforms.ToTensor(),transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 testset = torchvision.datasets.CIFAR10(root='./data', train=False,download=True, transform=transform)
-testloader = torch.utils.data.DataLoader(testset, batch_size=4, shuffle=False, num_workers=2)
+testloader = torch.utils.data.DataLoader(testset, batch_size=1, shuffle=False, num_workers=2)
 classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
 #setup Clipper connection
@@ -74,9 +75,9 @@ for i in range(10):
 		for j in range(batch_size):
 			image = dataiter.next()
 			input_list += image[0].data.numpy().flatten().tolist()
-		print("input list")
-		print(type(input_list))
-		print(len(input_list))
+		# print("input list")
+		# print(type(input_list))
+		# print(len(input_list))
 		predict(
 			clipper_conn.get_query_addr(),
 			input_list,

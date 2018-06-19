@@ -122,21 +122,17 @@ if __name__ == '__main__':
 	clipper_conn = ClipperConnection(KubernetesContainerManager(useInternalIP=True))
 	# clipper_conn = ClipperConnection(DockerContainerManager())
 	clipper_conn.start_clipper()
-	clipper_conn.register_application(name="pytorch-example", input_type="doubles", default_output="-1.0", slo_micros=100000)
+	clipper_conn.register_application(name="pytorch-example-2", input_type="doubles", default_output="-1.0", slo_micros=100000)
 	# model = nn.Linear(1, 1)
 
 # Define a shift function to normalize prediction inputs
 	def pred(model, inputs):
-		# input_arr = np.reshape(inputs, (-1, 3, 32, 32))
-		# input_tensor = torch.FloatTensor(input_arr)
-		# pred = model(input_tensor)
-		# pred_list = pred.data.numpy()
-		# print("query results")	
-		# print(pred_list)
-		# print(len([pred_list]))
-		# print(len(pred_list))
-		# print(len(str(pred_list)))
-		return [torch.FloatTensor(np.reshape(i, (-1, 3, 32, 32))).data.numpy() for i in inputs]
+		preds = []
+		for i in inputs:
+			preds.append(np.random.rand(1,10))
+		return preds
+
+		# return [model(torch.FloatTensor(np.reshape(i, (-1, 3, 32, 32))).data.numpy()) for i in inputs]
 		# return [str(model(torch.FloatTensor(np.reshape(i, (1, 3, 32, 32)))).data.numpy()) for i in inputs]
 
 	deploy_pytorch_model(
@@ -149,7 +145,7 @@ if __name__ == '__main__':
 	    registry="hsubbaraj"
 	    )
 
-	clipper_conn.link_model_to_app(app_name="pytorch-example", model_name="pytorch-nn")
+	clipper_conn.link_model_to_app(app_name="pytorch-example-2", model_name="pytorch-nn")
 	time.sleep(2)
 	print("deployed model")
 
