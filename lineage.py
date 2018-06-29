@@ -4,8 +4,12 @@ class Lineage():
 		self.path = path
 		self.used = False
 
+	def __repr__(self):
+		l = [self.val, self.path, self.used]
+		return str(l)
+
 	@classmethod
-	def add_node(parent, new_node_name, new_val):
+	def add_node(self, parent, new_node_name, new_val):
 		path = parent.path.copy()
 		path.append(new_node_name)
 		return Lineage(new_val, path)
@@ -15,6 +19,7 @@ class Lineage():
 		return Lineage(self.val, self.path.copy())
 
 	def make_prediction(self):
+		print("updating used")
 		if self.used == True:
 			raise Exception("Already made prediction from this lineage object")		
 		self.used = True
