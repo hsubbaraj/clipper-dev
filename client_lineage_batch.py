@@ -26,15 +26,19 @@ def predict(addr, model_name, input_lin, batch=False):
 		req_json = json.dumps({'input': [input_lin.val]})
 	headers = {'Content-type': 'application/json'}
 	r = requests.post(url, headers=headers, data=req_json)
-	input_lin.make_prediction()
-	return Lineage.add_node(input_lin, model_name, json.loads(r.text)["output"][0])
+	# print(json.loads(r.text))
+	str_r = json.loads(r.text)["output"].replace("[", "").replace("]", "").split()
+	vals = [float(i) for i in str_r]
+	new_lineage_objs = [Lineage.add_node(input_lin[i], model_name, vals[i]) for i in range(len(input_lin))]
+	return new_lineage_objs
+	
 
 
 #setup Clipper connection
 clipper_conn = ClipperConnection(KubernetesContainerManager(useInternalIP=True))
 clipper_conn.connect()
 
-batch_size = 1
+batch_size = 2
 # batches = np.array([])
 # times = np.array([])
 for i in range(20):
@@ -42,15 +46,16 @@ for i in range(20):
 	print("request " + str(i))
 	if batch_size > 1:
 		input_list = [Lineage(np.random.random_sample()) for i in range(batch_size)]
-		out_json = predict(clipper_conn.get_query_addr(), "lineage1", input_list, batch=True)
-		# print(json.loads(output_1)["output"][0])
+		out_lin_1 = predict(clipper_conn.get_query_addr(), "lineage1", input_list, batch=True)
+		print(out_lin_1)
+		out_lin_2 = predict(clipper_conn.get_query_addr(), "lineage2", out_lin_1, batch=True)
+		print(out_lin_2)
 	else:
 		input_lin = Lineage(np.random.random_sample())
 		out_lin_1 = predict(clipper_conn.get_query_addr(), "lineage1", input_lin)
 		print(out_lin_1)
 		out_lin_2 = predict(clipper_conn.get_query_addr(), "lineage2", out_lin_1)
 		print(out_lin_2)
-		print(out_lin_1)
 print("finished running clipper")
 
 
